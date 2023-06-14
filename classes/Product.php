@@ -1,13 +1,15 @@
 <?php
 
-class Product {
+class Product
+{
     private $sku;
     private $name;
     private $price;
-    private $type;
-    private $attributes;
+    protected $type;
+    protected $attributes;
 
-    public function __construct($sku, $name, $price, $type, $attributes) {
+    public function __construct($sku, $name, $price, $type, $attributes = [])
+    {
         $this->sku = $sku;
         $this->name = $name;
         $this->price = $price;
@@ -15,23 +17,48 @@ class Product {
         $this->attributes = $attributes;
     }
 
-    public function getSKU() {
+    public function getSKU()
+    {
         return $this->sku;
     }
 
-    public function getName() {
+    public function getName()
+    {
         return $this->name;
     }
 
-    public function getPrice() {
+    public function getPrice()
+    {
         return $this->price;
     }
 
-    public function getType() {
-        return $this->type;
+    public function getAttributes()
+    {
+        return $this->attributes;
     }
 
-    public function getAttributes() {
-        return $this->attributes;
+    public function setAttributes($attributes)
+    {
+        // $this->attributes = $attributes;
+
+        if (!is_array($attributes)) {
+            throw new InvalidArgumentException('Attributes must be an associative array.');
+        }
+
+        $this->attributes = $attributes;
+    }
+
+    public function save($database)
+    {
+        $query = "INSERT INTO products (sku, name, price, type, attributes) VALUES (:sku, :name, :price, :type, :attributes)";
+        $params = [
+            'sku' => $this->sku,
+            'name' => $this->name,
+            'price' => $this->price,
+            'type' => $this->type,
+            'attributes' => json_encode($this->attributes)
+        ];
+
+        $database->executeQuery($query, $params);
     }
 }

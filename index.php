@@ -16,37 +16,42 @@ $products = $database->fetchAll($query);
 <head>
     <meta charset="UTF-8">
     <title>Product List</title>
-    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="./css/style.css">
 </head>
 <body>
-    <h1>Product List</h1>
-
-    <form action="delete-product.php" method="POST">
+    <div class="wrapper">
+    <div class="header">
+        <h1>Product List</h1>
+        <div class="actions">
+            <a href="add-product.php" class="actions-btn add-link">Add</a>
+            <input type="submit" value="Mass Delete" name="mass-delete" class="actions-btn delete-button" form="delete-form">
+        </div> 
+    </div>
+    <form id="delete-form" action="delete-product.php" method="POST" class="form">
+        <div class="container">
         <?php foreach ($products as $product): ?>
             <div class="product-card">
                 <input type="checkbox" name="delete[]" value="<?php echo $product['id']; ?>" class="delete-checkbox">
-                <h2><?php echo $product['name']; ?></h2>
-                <p>SKU: <?php echo $product['sku']; ?></p>
-                <p>Price: $<?php echo $product['price']; ?></p>
-                <?php if ($product['type'] === 'book'): ?>
-                    <p>Weight: <?php echo $product['attributes']; ?> kg</p>
-                <?php elseif ($product['type'] === 'dvd'): ?>
-                    <p>Size: <?php echo $product['attributes']; ?> MB</p>
-                <?php elseif ($product['type'] === 'furniture'): ?>
+                <div class="product-content">
+                    <p><?php echo $product['sku']; ?></p>
+                    <p><?php echo $product['name']; ?></p>
+                    <p>$<?php echo $product['price']; ?></p>
                     <?php
-                    $dimensions = explode('x', $product['attributes']);
-                    $height = $dimensions[0];
-                    $width = $dimensions[1];
-                    $length = $dimensions[2];
+                    $attributes = json_decode($product['attributes'], true);
+                    if ($product['type'] === 'book' && isset($attributes['weight'])):
                     ?>
-                    <p>Dimensions: <?php echo $height; ?>x<?php echo $width; ?>x<?php echo $length; ?> cm</p>
-                <?php endif; ?>
+                        <p><?php echo $attributes['weight']; ?> kg</p>
+                    <?php elseif ($product['type'] === 'dvd' && isset($attributes['size'])): ?>
+                        <p><?php echo $attributes['size']; ?> MB</p>
+                    <?php elseif ($product['type'] === 'furniture' && isset($attributes['height']) && isset($attributes['width']) && isset($attributes['length'])): ?>
+                        <p><?php echo $attributes['height']; ?> x <?php echo $attributes['width']; ?> x <?php echo $attributes['length']; ?> cm</p>
+                    <?php endif; ?>
+                </div>
             </div>
         <?php endforeach; ?>
-
-        <button type="submit" name="mass-delete">Mass Delete</button>
+        </div>
+       
     </form>
-
-    <a href="add-product.php" class="add-link">Add Product</a>
+    </div>
 </body>
 </html>
